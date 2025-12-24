@@ -546,6 +546,7 @@ namespace TTCSDL_NHOM7.DAOs
         public static DataTable Get_LichChieu_ChuaTaoVe()
             => Ve_CRUD("GET_LICHCHIEU_CHUA_TAO_VE");
         #endregion
+
         // Các hàm tiện ích chuyển đổi hình ảnh
         #region Image Utils
         public static byte[] ImageToByteArray(Image img)

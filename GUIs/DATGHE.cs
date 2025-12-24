@@ -597,10 +597,11 @@ namespace TTCSDL_NHOM7.GUIs
                 string idNhanVien = TTCSDL_NHOM7.Utilities.UserSession.MaNV ?? "";
 
                 DataProvider.ExecuteNonQuery(
-                    "INSERT INTO HoaDon (id, idNhanVien, NgayLap, TongTien, GiamGia, ThanhTien, PhuongThucTT, TrangThai) " +
-                    "VALUES (@id, @idNhanVien, GETDATE(), @tongTien, 0, @tongTien, 0, 1)",
+                    "INSERT INTO HoaDon (id, idLichChieu, idNhanVien, NgayLap, TongTien, GiamGia, ThanhTien, PhuongThucTT, TrangThai) " +
+                    "VALUES (@id, @idLichChieu, @idNhanVien, GETDATE(), @tongTien, 0, @tongTien, 0, 2)",
                     CommandType.Text,
                     new SqlParameter("@id", idHoaDon),
+                    new SqlParameter("@idLichChieu", idLichChieu),
                     new SqlParameter("@idNhanVien", idNhanVien),
                     new SqlParameter("@tongTien", tongTien)
                 );
