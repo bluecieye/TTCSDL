@@ -410,6 +410,7 @@ namespace TTCSDL_NHOM7.DAOs
         internal enum GheAction
         {
             GET_BY_PHONG,
+            GET_BY_LICHCHIEU,
             GENERATE_BY_PHONG,
             DELETE_ALL_BY_PHONG,
             UPDATE_LOAIGHE_GHE,

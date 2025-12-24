@@ -135,7 +135,7 @@ namespace TTCSDL_NHOM7.GUIs
                 var dtGhe = DataProvider.ExecuteQuery(
                     "USP_Ghe_CRUD",
                     CommandType.StoredProcedure,
-                    new SqlParameter("@Action", "GET_BY_PHONG"),
+                    new SqlParameter("@Action", "GET_BY_LICHCHIEU"),
                     new SqlParameter("@IdPhong", idPhong)
                 );
 
