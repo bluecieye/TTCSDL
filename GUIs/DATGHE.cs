@@ -136,6 +136,7 @@ namespace TTCSDL_NHOM7.GUIs
                     "USP_Ghe_CRUD",
                     CommandType.StoredProcedure,
                     new SqlParameter("@Action", "GET_BY_LICHCHIEU"),
+                    new SqlParameter("@Keyword", idLichChieu),
                     new SqlParameter("@IdPhong", idPhong)
                 );
 
