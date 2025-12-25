@@ -182,6 +182,7 @@
             dtgvVe.Location = new Point(0, 60);
             dtgvVe.Margin = new Padding(4, 3, 4, 3);
             dtgvVe.Name = "dtgvVe";
+            dtgvVe.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dtgvVe.Size = new Size(546, 430);
             dtgvVe.TabIndex = 12;
             // 

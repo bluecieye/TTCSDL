@@ -4,7 +4,7 @@ using System.Text;
 
 namespace TTCSDL_NHOM7.Utilities
 {
-    internal class MonAnItem
+    public class MonAnItem
     {
         public string MaMon { get; set; } = string.Empty;
         public string TenMon { get; set; } = string.Empty;

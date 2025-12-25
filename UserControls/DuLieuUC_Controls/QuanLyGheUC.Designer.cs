@@ -353,10 +353,13 @@
             // 
             // dgvGhe
             // 
+            dgvGhe.AllowUserToAddRows = false;
+            dgvGhe.AllowUserToDeleteRows = false;
             dgvGhe.BackgroundColor = Color.White;
             dgvGhe.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvGhe.Location = new Point(15, 65);
             dgvGhe.Name = "dgvGhe";
+            dgvGhe.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvGhe.Size = new Size(911, 185);
             dgvGhe.TabIndex = 0;
             dgvGhe.CellContentClick += dgvGhe_CellContentClick;

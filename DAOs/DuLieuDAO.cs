@@ -539,6 +539,10 @@ namespace TTCSDL_NHOM7.DAOs
         public static DataTable GetAll_Ve()
             => Ve_CRUD("GET_ALL");
 
+        // Lấy vé theo lịch chiếu
+        public static DataTable GetAll_Ve(string maLichChieu)
+            => Ve_CRUD("GET_ALL_THEO_LICHCHIEU", maLichChieu);
+
         // Tự động tạo vé theo lịch chiếu
         public static void AutoAdd_Ve(string maLichChieu)
             => Ve_CRUD("AUTO_ADD", maLichChieu);

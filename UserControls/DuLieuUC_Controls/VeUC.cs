@@ -46,6 +46,7 @@ namespace TTCSDL_NHOM7.UserControls.DuLieuUC_Controls
             string maLichChieu = listview_TatCaLichChieu.SelectedItems[0].Tag.ToString();
             DuLieuDAO.AutoAdd_Ve(maLichChieu);
             MessageBox.Show("Đã tạo vé cho lịch chiếu");
+            dtgvVe.DataSource = DuLieuDAO.GetAll_Ve(maLichChieu);
         }
 
 
@@ -78,7 +79,14 @@ namespace TTCSDL_NHOM7.UserControls.DuLieuUC_Controls
 
         private void btn_TatCaVeTheoLichChieu_Click(object sender, EventArgs e)
         {
-            dtgvVe.DataSource = DuLieuDAO.GetAll_Ve();
+            if (listview_TatCaLichChieu.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Chọn lịch chiếu");
+                return;
+            }
+
+            string maLichChieu = listview_TatCaLichChieu.SelectedItems[0].Tag.ToString();
+            dtgvVe.DataSource = DuLieuDAO.GetAll_Ve(maLichChieu);
         }
 
 
