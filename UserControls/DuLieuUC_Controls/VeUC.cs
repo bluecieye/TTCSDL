@@ -36,7 +36,6 @@ namespace TTCSDL_NHOM7.UserControls.DuLieuUC_Controls
                 item.SubItems.Add(phim);
                 item.SubItems.Add(Convert.ToDateTime(row["ThoiGianChieu"]).ToString("dd/MM/yyyy HH:mm"));
 
-                // Kiểm tra trực tiếp DB: có vé chưa?
                 string maLichChieu = row["MaLichChieu"].ToString();
                 DataTable dtVe = DuLieuDAO.GetAll_Ve(maLichChieu);
                 item.SubItems.Add(dtVe.Rows.Count > 0 ? "Đã tạo" : "Chưa tạo vé");
