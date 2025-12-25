@@ -26,6 +26,9 @@
         private void InitializeComponent()
         {
             panel1 = new Panel();
+            btntenphim = new Button();
+            lbtenphim = new Label();
+            txttimten = new TextBox();
             btnBack = new Button();
             label4 = new Label();
             lbphim = new Label();
@@ -42,6 +45,9 @@
             // panel1
             // 
             panel1.BackColor = Color.FromArgb(223, 215, 191);
+            panel1.Controls.Add(btntenphim);
+            panel1.Controls.Add(lbtenphim);
+            panel1.Controls.Add(txttimten);
             panel1.Controls.Add(btnBack);
             panel1.Controls.Add(label4);
             panel1.Controls.Add(lbphim);
@@ -54,6 +60,38 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(1200, 100);
             panel1.TabIndex = 0;
+            // 
+            // btntenphim
+            // 
+            btntenphim.BackColor = Color.SaddleBrown;
+            btntenphim.FlatStyle = FlatStyle.Flat;
+            btntenphim.Font = new Font("Microsoft Sans Serif", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btntenphim.ForeColor = Color.White;
+            btntenphim.Location = new Point(782, 66);
+            btntenphim.Margin = new Padding(3, 2, 3, 2);
+            btntenphim.Name = "btntenphim";
+            btntenphim.Size = new Size(84, 28);
+            btntenphim.TabIndex = 14;
+            btntenphim.Text = "Tìm kiếm";
+            btntenphim.UseVisualStyleBackColor = false;
+            btntenphim.Click += btntenphim_Click;
+            // 
+            // lbtenphim
+            // 
+            lbtenphim.AutoSize = true;
+            lbtenphim.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lbtenphim.Location = new Point(389, 73);
+            lbtenphim.Name = "lbtenphim";
+            lbtenphim.Size = new Size(88, 20);
+            lbtenphim.TabIndex = 13;
+            lbtenphim.Text = "Tên Phim:";
+            // 
+            // txttimten
+            // 
+            txttimten.Location = new Point(507, 75);
+            txttimten.Name = "txttimten";
+            txttimten.Size = new Size(257, 19);
+            txttimten.TabIndex = 12;
             // 
             // btnBack
             // 
@@ -74,7 +112,7 @@
             // 
             label4.AutoSize = true;
             label4.Font = new Font("Microsoft Sans Serif", 9F, FontStyle.Italic, GraphicsUnit.Point, 0);
-            label4.Location = new Point(586, 52);
+            label4.Location = new Point(582, 47);
             label4.Name = "label4";
             label4.Size = new Size(145, 15);
             label4.TabIndex = 10;
@@ -97,10 +135,10 @@
             btnSearchdate.FlatStyle = FlatStyle.Flat;
             btnSearchdate.Font = new Font("Microsoft Sans Serif", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnSearchdate.ForeColor = Color.White;
-            btnSearchdate.Location = new Point(600, 10);
+            btnSearchdate.Location = new Point(602, 15);
             btnSearchdate.Margin = new Padding(3, 2, 3, 2);
             btnSearchdate.Name = "btnSearchdate";
-            btnSearchdate.Size = new Size(120, 40);
+            btnSearchdate.Size = new Size(88, 28);
             btnSearchdate.TabIndex = 8;
             btnSearchdate.Text = "Tìm kiếm";
             btnSearchdate.UseVisualStyleBackColor = false;
@@ -117,7 +155,7 @@
             dtpNgayChieu.Name = "dtpNgayChieu";
             dtpNgayChieu.Size = new Size(180, 23);
             dtpNgayChieu.TabIndex = 4;
-            dtpNgayChieu.Value = DateTime.Now;
+            dtpNgayChieu.Value = new DateTime(2025, 12, 25, 11, 41, 54, 658);
             // 
             // label2
             // 
@@ -161,7 +199,7 @@
             flowLayoutPanelPhim.Size = new Size(1160, 615);
             flowLayoutPanelPhim.TabIndex = 0;
             // 
-            // BANVE
+            // CHONPHIM
             // 
             AutoScaleMode = AutoScaleMode.None;
             BackColor = Color.White;
@@ -170,7 +208,7 @@
             Controls.Add(panel1);
             Font = new Font("Microsoft Sans Serif", 7.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
             MinimumSize = new Size(800, 600);
-            Name = "BANVE";
+            Name = "CHONPHIM";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Danh sách phim";
             panel1.ResumeLayout(false);
@@ -178,5 +216,9 @@
             panelContainer.ResumeLayout(false);
             ResumeLayout(false);
         }
+
+        private Button btntenphim;
+        private Label lbtenphim;
+        private TextBox txttimten;
     }
 }

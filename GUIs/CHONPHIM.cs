@@ -133,5 +133,10 @@ namespace TTCSDL_NHOM7.GUIs
         {
             this.Close();
         }
+
+        private void btntenphim_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
