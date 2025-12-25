@@ -428,7 +428,8 @@ namespace TTCSDL_NHOM7.DAOs
             int? idLoaiGhe = null,
             string keyword = null,
             string tenLoaiGhe = null,
-            decimal? chiPhi = null
+            decimal? chiPhi = null,
+            string idLichChieu = null
         )
         {
             return DataProvider.ExecuteQuery(
@@ -440,7 +441,8 @@ namespace TTCSDL_NHOM7.DAOs
                 new SqlParameter("@IdLoaiGhe", ToDbValue(idLoaiGhe)),
                 new SqlParameter("@Keyword", ToDbValue(keyword)),
                 new SqlParameter("@TenLoaiGhe", ToDbValue(tenLoaiGhe)),
-                new SqlParameter("@ChiPhi", ToDbValue(chiPhi))
+                new SqlParameter("@ChiPhi", ToDbValue(chiPhi)),
+                new SqlParameter("@idLichChieu", ToDbValue(idLichChieu))
             );
         }
         public static DataTable LayDanhSachGheTheoPhong(string idPhong)
@@ -512,6 +514,13 @@ namespace TTCSDL_NHOM7.DAOs
             );
             return dt != null ? 1 : 0;  
         }
+        public static DataTable LayGheDaDatTheoLichChieu(string idLichChieu)
+        {
+            return Ghe_Service(
+                GheAction.GET_BY_LICHCHIEU,
+                idLichChieu: idLichChieu
+            );
+        }
         #endregion
 
         // Thao tác với bảng vé
@@ -545,6 +554,37 @@ namespace TTCSDL_NHOM7.DAOs
         // Lịch chiếu chưa tạo vé
         public static DataTable Get_LichChieu_ChuaTaoVe()
             => Ve_CRUD("GET_LICHCHIEU_CHUA_TAO_VE");
+        #endregion
+
+        //Thao tác với bảng hóa đơn
+        #region HoaDon
+        public static int Insert_HoaDon(string id, string idNhanVien, decimal tongTien, string idLichChieu = null)
+        {
+            try
+            {
+                string query = "INSERT INTO HoaDon (id, idNhanVien, NgayLap, TongTien, GiamGia, ThanhTien, PhuongThucTT, TrangThai, idLichChieu) " +
+                              "VALUES (@id, @idNhanVien, GETDATE(), @tongTien, 0, @tongTien, 0, 1, @idLichChieu)";
+
+                var parameters = new List<SqlParameter>
+        {
+            new SqlParameter("@id", id),
+            new SqlParameter("@idNhanVien", idNhanVien),
+            new SqlParameter("@tongTien", tongTien)
+        };
+
+                if (!string.IsNullOrEmpty(idLichChieu))
+                    parameters.Add(new SqlParameter("@idLichChieu", idLichChieu));
+                else
+                    parameters.Add(new SqlParameter("@idLichChieu", DBNull.Value));
+
+                return DataProvider.ExecuteNonQuery(query, CommandType.Text, parameters.ToArray());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi thêm hóa đơn: {ex.Message}");
+                return 0;
+            }
+        }
         #endregion
 
         // Các hàm tiện ích chuyển đổi hình ảnh
