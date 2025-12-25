@@ -574,6 +574,49 @@ namespace TTCSDL_NHOM7.DAOs
         // Lịch chiếu chưa tạo vé
         public static DataTable Get_LichChieu_ChuaTaoVe()
             => Ve_CRUD("GET_LICHCHIEU_CHUA_TAO_VE");
+
+        // Các vé còn trống
+        public static int GetSoVeConTrong(string idLichChieu)
+        {
+            try
+            {
+                string query = @"SELECT COUNT(*) as SoVeConTrong
+                        FROM Ve 
+                        WHERE idLichChieu = @idLichChieu AND TrangThai = 0";
+
+                DataTable dt = DataProvider.ExecuteQuery(query, CommandType.Text,
+                    new SqlParameter("@idLichChieu", idLichChieu));
+
+                return dt.Rows.Count > 0 ? Convert.ToInt32(dt.Rows[0]["SoVeConTrong"]) : 0;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        // Lấy suất chiếu đã có vé
+        public static DataTable LaySuatChieuDaCoVe(string idPhim, DateTime ngayChieu)
+        {
+            string query = @"SELECT DISTINCT
+                    LC.id AS MaLichChieu,
+                    LC.ThoiGianChieu,
+                    LC.GiaVe,
+                    PC.TenPhong,
+                    LMH.TenMH AS TenLoaiManHinh
+                FROM LichChieu LC
+                JOIN DinhDangPhim DD ON LC.idDinhDang = DD.id
+                JOIN PhongChieu PC ON LC.idPhong = PC.id
+                JOIN LoaiManHinh LMH ON DD.idLoaiManHinh = LMH.id
+                WHERE DD.idPhim = @idPhim
+                  AND CAST(LC.ThoiGianChieu AS DATE) = @ngayChieu
+                  AND EXISTS (SELECT 1 FROM Ve V WHERE V.idLichChieu = LC.id)
+                ORDER BY LC.ThoiGianChieu";
+
+            return DataProvider.ExecuteQuery(query, CommandType.Text,
+                new SqlParameter("@idPhim", idPhim),
+                new SqlParameter("@ngayChieu", ngayChieu.Date));
+        }
         #endregion
 
         //Thao tác với bảng hóa đơn

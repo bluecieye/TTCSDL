@@ -61,34 +61,37 @@ namespace TTCSDL_NHOM7.GUIs
                     DateTime thoiGianChieu = Convert.ToDateTime(row["ThoiGianChieu"]);
                     decimal giaVe = Convert.ToDecimal(row["GiaVe"] ?? 0);
 
+                    int veConTrong = DuLieuDAO.GetSoVeConTrong(idLichChieu);
+
                     Button btnSuatChieu = new Button
                     {
-                        Width = 200,
-                        Height = 80,
+                        Width = 220,
+                        Height = 90,
                         Margin = new Padding(10),
                         Tag = idLichChieu,
                         Text = $"Rạp: {row["TenPhong"]?.ToString() ?? ""}\n" +
-                               $"Giờ: {thoiGianChieu:HH:mm}\n" +
-                               $"Màn hình: {row["TenLoaiManHinh"]?.ToString() ?? ""}\n" +
-                               $"Giá: {giaVe:#,##0} VNĐ",
-                        Font = new Font("Arial", 9, FontStyle.Bold)
+                       $"Giờ: {thoiGianChieu:HH:mm}\n" +
+                       $"Màn hình: {row["TenLoaiManHinh"]?.ToString() ?? ""}\n" +
+                       $"Giá: {giaVe:#,##0} VNĐ\n" +
+                       $"Còn trống: {veConTrong} vé",
+                        Font = new Font("Arial", 8, FontStyle.Bold),
+                        BackColor = veConTrong > 0 ? Color.LightGreen : Color.LightGray,
+                        Enabled = veConTrong > 0
                     };
 
                     btnSuatChieu.Click += BtnSuatChieu_Click;
                     flowLayoutPanelShowtimes.Controls.Add(btnSuatChieu);
                 }
-                btnBookSeats.Enabled = false;
             }
             else
             {
                 Label lbl = new Label
                 {
-                    Text = "Không có suất chiếu nào cho phim này vào ngày đã chọn",
+                    Text = "Không có suất chiếu nào có sẵn vé",
                     Font = new Font("Arial", 12, FontStyle.Bold),
                     ForeColor = Color.Red
                 };
                 flowLayoutPanelShowtimes.Controls.Add(lbl);
-                btnBookSeats.Enabled = false;
             }
         }
 
