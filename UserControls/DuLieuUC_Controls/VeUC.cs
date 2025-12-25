@@ -32,8 +32,7 @@ namespace TTCSDL_NHOM7.UserControls.DuLieuUC_Controls
             {
                 ListViewItem item = new ListViewItem(row["MaPhong"].ToString());
 
-                string phim = row.Table.Columns.Contains("TenPhim") ? row["TenPhim"].ToString() :
-                              row.Table.Columns.Contains("MaDinhDang") ? row["MaDinhDang"].ToString() : "";
+                string phim = row.Table.Columns.Contains("TenPhim") ? row["TenPhim"].ToString() : row.Table.Columns.Contains("MaDinhDang") ? row["MaDinhDang"].ToString() : "";
                 item.SubItems.Add(phim);
                 item.SubItems.Add(Convert.ToDateTime(row["ThoiGianChieu"]).ToString("dd/MM/yyyy HH:mm"));
 
