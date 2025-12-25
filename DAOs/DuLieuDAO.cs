@@ -316,12 +316,25 @@ namespace TTCSDL_NHOM7.DAOs
                 ngayKhoiChieu: ngay
             );
         }
+        ///
+        public static DataTable LayPhimDangChieu_TimKiem(DateTime ngay, string tenPhim)
+        {
+            return Phim_CRUD(
+                "GET_PHIM_DANG_CHIEU_SEARCH",
+                ngayKhoiChieu: ngay,
+                tenPhim: tenPhim
+            );
+        }
+
+        ///
         public static byte[]? LayPosterPhim(string maPhim)
         {
             var dt = Phim_CRUD(
                 "GET_POSTER",
                 maPhim: maPhim
             );
+
+
 
             if (dt != null && dt.Rows.Count > 0 && dt.Rows[0]["ApPhich"] != DBNull.Value)
                 return (byte[])dt.Rows[0]["ApPhich"];
