@@ -5,8 +5,8 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using TTCSDL_NHOM7.DAOs;
-using Microsoft.Data.SqlClient;
 using TTCSDL_NHOM7.Utilities;
+using Microsoft.Data.SqlClient;
 
 namespace TTCSDL_NHOM7.GUIs
 {
@@ -15,8 +15,11 @@ namespace TTCSDL_NHOM7.GUIs
         private string idLichChieu;
         private List<string> danhSachGhe;
         private decimal tongTienVe;
-        private List<MonAnItem> gioHang = new List<MonAnItem>();
-        public List<MonAnItem> GioHang => gioHang;
+        private List<MonAnItem> _gioHang = new List<MonAnItem>();
+        public List<MonAnItem> GioHang
+        {
+            get { return _gioHang; }
+        }
         private DataTable allMonAn;
 
         public MONAN(string idLichChieu, List<string> danhSachGhe, decimal tongTienVe)
@@ -35,15 +38,9 @@ namespace TTCSDL_NHOM7.GUIs
         {
             try
             {
-                // Lấy thông tin lịch chiếu
-                var dt = DataProvider.ExecuteQuery(
-                    "USP_LichChieu_CRUD",
-                    CommandType.StoredProcedure,
-                    new SqlParameter("@Action", "SEARCH"),
-                    new SqlParameter("@MaLichChieu", idLichChieu)
-                );
+                // Lấy thông tin lịch chiếu bằng DuLieuDAO
+                var dt = DuLieuDAO.Search_LichChieu(maLichChieu: idLichChieu);
 
-                // Debug: In ra cấu trúc của DataTable
                 Console.WriteLine($"=== DEBUG: LoadThongTinDatCho ===");
                 Console.WriteLine($"DataTable is null: {dt == null}");
                 if (dt != null)
@@ -61,7 +58,7 @@ namespace TTCSDL_NHOM7.GUIs
                 {
                     DataRow row = dt.Rows[0];
 
-                    // Lấy tên phim - theo stored procedure trả về cột TenPhim
+                    // Lấy tên phim
                     string tenPhim = "Không rõ";
                     if (dt.Columns.Contains("TenPhim") && row["TenPhim"] != DBNull.Value)
                     {
@@ -112,14 +109,8 @@ namespace TTCSDL_NHOM7.GUIs
         {
             try
             {
-                // Sử dụng stored procedure để lấy tất cả món ăn
-                allMonAn = DataProvider.ExecuteQuery(
-                    "USP_MonAn_CRUD",
-                    CommandType.StoredProcedure,
-                    new SqlParameter("@Action", "SELECT")
-                );
-
-
+                // Sử dụng DuLieuDAO để lấy tất cả món ăn
+                allMonAn = DuLieuDAO.GetAll_MonAn();
                 Console.WriteLine($"Đã tải {allMonAn.Rows.Count} món ăn");
             }
             catch (Exception ex)
@@ -132,7 +123,7 @@ namespace TTCSDL_NHOM7.GUIs
 
         private void HienThiMonAnTheoLoai(int loaiMon)
         {
-            // flowLayoutPanelFood.Controls.Clear();
+            flowLayoutPanelFood.Controls.Clear();
 
             if (allMonAn == null || allMonAn.Rows.Count == 0)
             {
@@ -215,8 +206,7 @@ namespace TTCSDL_NHOM7.GUIs
                     try
                     {
                         byte[] imageData = (byte[])row["Hình ảnh"];
-                        using (var ms = new System.IO.MemoryStream(imageData))
-                            pic.Image = Image.FromStream(ms);
+                        pic.Image = DuLieuDAO.ByteArrayToImage(imageData);
                     }
                     catch
                     {
@@ -228,11 +218,13 @@ namespace TTCSDL_NHOM7.GUIs
                 {
                     // Ảnh mặc định
                     pic.BackColor = Color.LightGray;
-                    using (Graphics g = Graphics.FromImage(new Bitmap(180, 120)))
+                    using (Bitmap bmp = new Bitmap(180, 120))
+                    using (Graphics g = Graphics.FromImage(bmp))
                     {
                         g.Clear(Color.LightGray);
                         g.DrawString("NO IMAGE", new Font("Arial", 12, FontStyle.Bold),
                             Brushes.White, new PointF(60, 50));
+                        pic.Image = (Image)bmp.Clone();
                     }
                 }
 
@@ -319,6 +311,7 @@ namespace TTCSDL_NHOM7.GUIs
                 var maGheList = new List<string>();
                 foreach (string idGhe in danhSachGhe)
                 {
+                    // Sử dụng DataProvider trực tiếp vì đây là query đơn giản
                     var dt = DataProvider.ExecuteQuery(
                         "SELECT MaGhe FROM Ghe WHERE id = @id",
                         CommandType.Text,
@@ -352,7 +345,7 @@ namespace TTCSDL_NHOM7.GUIs
                     decimal donGia = Convert.ToDecimal(row["Đơn giá"]);
 
                     // Kiểm tra xem đã có trong giỏ hàng chưa
-                    MonAnItem item = gioHang.Find(x => x.MaMon == idMonAn);
+                    MonAnItem item = GioHang.Find(x => x.MaMon == idMonAn);
                     if (item != null)
                     {
                         item.SoLuong++;
@@ -366,22 +359,13 @@ namespace TTCSDL_NHOM7.GUIs
                             DonGia = donGia,
                             SoLuong = 1
                         };
-                        gioHang.Add(item);
+                        GioHang.Add(item);
                     }
 
                     CapNhatGioHang();
 
                     // Hiệu ứng visual
                     btn.BackColor = Color.Yellow;
-                    //// Timer timer = new Timer();
-                    // timer.Interval = 300;
-                    // timer.Tick += (s, ev) =>
-                    // {
-                    //     btn.BackColor = Color.LightGreen;
-                    //     timer.Stop();
-                    //     timer.Dispose();
-                    // };
-                    // timer.Start();
                 }
             }
         }
@@ -410,7 +394,7 @@ namespace TTCSDL_NHOM7.GUIs
             listViewCart.Items.Clear();
             decimal tongTienMonAn = 0;
 
-            foreach (MonAnItem item in gioHang)
+            foreach (MonAnItem item in GioHang)
             {
                 ListViewItem lvi = new ListViewItem(item.TenMon);
                 lvi.SubItems.Add(item.SoLuong.ToString());
@@ -422,11 +406,6 @@ namespace TTCSDL_NHOM7.GUIs
             }
 
             labelTotalValue.Text = tongTienMonAn.ToString("#,##0") + " VNĐ";
-
-            // Tính tổng cộng
-            decimal tongCong = tongTienVe + tongTienMonAn;
-            //labelTongCong.Text = $"TỔNG CỘNG: {tongCong:#,##0} VNĐ";
-            //labelTongCong.ForeColor = Color.Red;
         }
 
         private void btnCombo_Click(object sender, EventArgs e)
@@ -460,7 +439,7 @@ namespace TTCSDL_NHOM7.GUIs
 
         private void btnClearCart_Click(object sender, EventArgs e)
         {
-            if (gioHang.Count == 0)
+            if (GioHang.Count == 0)
             {
                 MessageBox.Show("Giỏ hàng đang trống!", "Thông báo",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -470,14 +449,14 @@ namespace TTCSDL_NHOM7.GUIs
             if (MessageBox.Show("Xóa toàn bộ giỏ hàng?", "Xác nhận",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                gioHang.Clear();
+                GioHang.Clear();
                 CapNhatGioHang();
             }
         }
 
         private void btnCheckout_Click(object sender, EventArgs e)
         {
-            if (gioHang.Count == 0)
+            if (GioHang.Count == 0)
             {
                 MessageBox.Show("Giỏ hàng đang trống!\nVui lòng chọn món ăn trước khi thanh toán.",
                     "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -485,7 +464,7 @@ namespace TTCSDL_NHOM7.GUIs
             }
 
             decimal tongTienMonAn = 0;
-            foreach (MonAnItem item in gioHang)
+            foreach (MonAnItem item in GioHang)
             {
                 tongTienMonAn += item.DonGia * item.SoLuong;
             }
@@ -512,7 +491,7 @@ namespace TTCSDL_NHOM7.GUIs
                 if (!string.IsNullOrEmpty(idHoaDon))
                 {
                     // Lưu chi tiết món ăn
-                    foreach (MonAnItem item in gioHang)
+                    foreach (MonAnItem item in GioHang)
                     {
                         LuuChiTietMonAn(idHoaDon, item);
                     }
@@ -534,15 +513,13 @@ namespace TTCSDL_NHOM7.GUIs
                 string idHoaDon = "HDMA" + DateTime.Now.ToString("yyyyMMddHHmmss");
                 string idNhanVien = TTCSDL_NHOM7.Utilities.UserSession.MaNV ?? "";
 
-                DataProvider.ExecuteNonQuery(
-                    "INSERT INTO HoaDon (id, idNhanVien, NgayLap, TongTien, GiamGia, ThanhTien, PhuongThucTT, TrangThai) " +
-                    "VALUES (@id, @idNhanVien, GETDATE(), @tongTien, 0, @tongTien, 0, 1)",
-                    CommandType.Text,
-                    new SqlParameter("@id", idHoaDon),
-                    new SqlParameter("@idNhanVien", idNhanVien),
-                    new SqlParameter("@tongTien", tongTien)
-                );
-                return idHoaDon;
+                // Sử dụng DuLieuDAO để thêm hóa đơn
+                int result = DuLieuDAO.Insert_HoaDon(idHoaDon, idNhanVien, tongTien);
+
+                if (result > 0)
+                    return idHoaDon;
+                else
+                    return string.Empty;
             }
             catch (Exception ex)
             {
@@ -556,16 +533,8 @@ namespace TTCSDL_NHOM7.GUIs
         {
             try
             {
-                DataProvider.ExecuteNonQuery(
-                    "INSERT INTO ChiTietMonAn (idHoaDon, idMonAn, SoLuong, DonGia, ThanhTien) " +
-                    "VALUES (@idHoaDon, @idMonAn, @soLuong, @donGia, @thanhTien)",
-                    CommandType.Text,
-                    new SqlParameter("@idHoaDon", idHoaDon),
-                    new SqlParameter("@idMonAn", item.MaMon),
-                    new SqlParameter("@soLuong", item.SoLuong),
-                    new SqlParameter("@donGia", item.DonGia),
-                    new SqlParameter("@thanhTien", item.DonGia * item.SoLuong)
-                );
+                // Sử dụng DuLieuDAO để thêm chi tiết món ăn
+                DuLieuDAO.Insert_ChiTietMonAn(idHoaDon, item.MaMon, item.SoLuong, item.DonGia, item.DonGia * item.SoLuong);
             }
             catch (Exception)
             {
@@ -582,13 +551,5 @@ namespace TTCSDL_NHOM7.GUIs
                 this.Close();
             }
         }
-    }
-
-    public class MonAnItem
-    {
-        public string MaMon { get; set; } = string.Empty;
-        public string TenMon { get; set; } = string.Empty;
-        public decimal DonGia { get; set; }
-        public int SoLuong { get; set; }
     }
 }

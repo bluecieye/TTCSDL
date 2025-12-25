@@ -32,13 +32,8 @@ namespace TTCSDL_NHOM7.GUIs
         {
             try
             {
-                // Lấy thông tin lịch chiếu bằng stored procedure
-                var dt = DataProvider.ExecuteQuery(
-                    "USP_LichChieu_CRUD",
-                    CommandType.StoredProcedure,
-                    new SqlParameter("@Action", "SEARCH"),
-                    new SqlParameter("@MaLichChieu", idLichChieu)
-                );
+                // Sử dụng DuLieuDAO để lấy thông tin lịch chiếu
+                var dt = DuLieuDAO.Search_LichChieu(maLichChieu: idLichChieu);
 
                 if (dt != null && dt.Rows.Count > 0)
                 {
@@ -131,14 +126,8 @@ namespace TTCSDL_NHOM7.GUIs
                     return;
                 }
 
-                // Sử dụng stored procedure để lấy danh sách ghế
-                var dtGhe = DataProvider.ExecuteQuery(
-                    "USP_Ghe_CRUD",
-                    CommandType.StoredProcedure,
-                    new SqlParameter("@Action", "GET_BY_LICHCHIEU"),
-                    new SqlParameter("@Keyword", idLichChieu),
-                    new SqlParameter("@IdPhong", idPhong)
-                );
+                // Sử dụng DuLieuDAO để lấy danh sách ghế
+                var dtGhe = DuLieuDAO.LayDanhSachGheTheoPhong(idPhong);
 
                 // Kiểm tra xem có ghế không
                 if (dtGhe == null || dtGhe.Rows.Count == 0)
@@ -173,17 +162,26 @@ namespace TTCSDL_NHOM7.GUIs
         {
             try
             {
-                // Lấy danh sách ghế đã đặt cho lịch chiếu này
+                // Lấy danh sách ghế đã đặt cho lịch chiếu này bằng DuLieuDAO
                 var dtGheDaDat = DataProvider.ExecuteQuery(
                     "SELECT idGhe FROM Ve WHERE idLichChieu = @idLichChieu AND TrangThai = 2",
                     CommandType.Text,
                     new SqlParameter("@idLichChieu", idLichChieu)
                 );
 
+                // Debug: In ra số ghế đã đặt
+                Console.WriteLine($"=== DEBUG: LoadGheDaDat ===");
+                Console.WriteLine($"Số ghế đã đặt: {dtGheDaDat.Rows.Count}");
+
+                danhSachGheDaDat.Clear(); // Xóa danh sách cũ trước khi thêm mới
+
                 foreach (DataRow row in dtGheDaDat.Rows)
                 {
-                    danhSachGheDaDat.Add(row["idGhe"].ToString());
+                    string idGhe = row["idGhe"].ToString().Trim();
+                    danhSachGheDaDat.Add(idGhe);
+                    Console.WriteLine($"Đã thêm ghế vào danh sách đã đặt: {idGhe}");
                 }
+                Console.WriteLine($"=== END DEBUG ===");
             }
             catch (Exception ex)
             {
@@ -271,10 +269,10 @@ namespace TTCSDL_NHOM7.GUIs
                     if (gheDict.ContainsKey((hang, cot)))
                     {
                         DataRow row = gheDict[(hang, cot)];
-                        string idGhe = row["id"].ToString();
+                        string idGhe = row["id"].ToString().Trim();
                         string maGhe = row["MaGhe"].ToString();
                         string tenLoaiGhe = row["TenLoaiGhe"].ToString();
-                        string trangThai = row["TrangThai"].ToString();
+                        string trangThaiGhe = row["TrangThai"].ToString();
                         decimal chiPhi = Convert.ToDecimal(row["ChiPhi"] ?? 0);
 
                         Button btnGhe = new Button
@@ -289,8 +287,12 @@ namespace TTCSDL_NHOM7.GUIs
                             FlatStyle = FlatStyle.Flat
                         };
 
+                        // Debug: Kiểm tra ghế này có trong danh sách đã đặt không
+                        bool isDaDat = danhSachGheDaDat.Contains(idGhe);
+                        Console.WriteLine($"Ghế {idGhe} (Mã: {maGhe}) - Đã đặt: {isDaDat}");
+
                         // Kiểm tra ghế đã đặt chưa
-                        if (danhSachGheDaDat.Contains(idGhe))
+                        if (isDaDat)
                         {
                             // Ghế đã đặt - màu đỏ, disabled
                             btnGhe.BackColor = Color.Red;
@@ -299,7 +301,7 @@ namespace TTCSDL_NHOM7.GUIs
                             btnGhe.FlatAppearance.BorderColor = Color.DarkRed;
                             btnGhe.Text = "X";
                         }
-                        else if (trangThai == "Đang sửa")
+                        else if (trangThaiGhe == "Đang sửa")
                         {
                             // Ghế đang sửa - màu xám, disabled
                             btnGhe.BackColor = Color.Gray;
@@ -343,21 +345,21 @@ namespace TTCSDL_NHOM7.GUIs
             }
 
             // Tạo label màn hình
-            //    Label lblScreen = new Label
-            //    {
-            //        Text = "MÀN HÌNH",
-            //        Location = new Point(startX + 30, currentY + 10),
-            //        Size = new Size((buttonSize + spacing) * maxCot - spacing, 30),
-            //        Font = new Font("Arial", 14, FontStyle.Bold),
-            //        TextAlign = ContentAlignment.MiddleCenter,
-            //        BackColor = Color.Gray,
-            //        ForeColor = Color.White,
-            //        BorderStyle = BorderStyle.FixedSingle
-            //    };
-            //    pnlGhe.Controls.Add(lblScreen);
+            Label lblScreen = new Label
+            {
+                Text = "MÀN HÌNH",
+                Location = new Point(startX + 30, currentY + 10),
+                Size = new Size((buttonSize + spacing) * maxCot - spacing, 30),
+                Font = new Font("Arial", 14, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter,
+                BackColor = Color.Gray,
+                ForeColor = Color.White,
+                BorderStyle = BorderStyle.FixedSingle
+            };
+            pnlGhe.Controls.Add(lblScreen);
 
-            //    // Thêm chú thích
-            //    AddLegend(currentY + 50);
+            // Thêm chú thích
+            AddLegend(currentY + 50);
         }
 
         private void AddLegend(int startY)
@@ -502,7 +504,6 @@ namespace TTCSDL_NHOM7.GUIs
             tongTien = danhSachGheChon.Count * giaVe;
 
             txtTongTien.Text = tongTien.ToString("#,##0");
-            // lblSoGhe.Text = $"Số ghế đã chọn: {danhSachGheChon.Count}";
         }
 
         private void BtnTiepTuc_Click(object sender, EventArgs e)
@@ -516,17 +517,20 @@ namespace TTCSDL_NHOM7.GUIs
 
             this.Hide();
             var frmMonAn = new MONAN(idLichChieu, danhSachGheChon, tongTien);
-            frmMonAn.ShowDialog();
 
-            // Nếu MONAN trả về DialogResult.OK (đã chọn món ăn)
-            if (frmMonAn.DialogResult == DialogResult.OK)
+            if (frmMonAn.ShowDialog() == DialogResult.OK)
             {
-                // Mở form HÓA ĐƠN với tất cả thông tin
-                var frmHoaDon = new HOADON(idLichChieu, danhSachGheChon, tongTien, frmMonAn.GioHang);
-                frmHoaDon.ShowDialog();
+                // Sau khi thanh toán món ăn thành công, cập nhật lại danh sách ghế đã đặt
+                LoadGheDaDat();
+                LoadDanhSachGhe();
+                MessageBox.Show("Thanh toán thành công!", "Thông báo",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                this.Close();
             }
-
-            this.Show();
+            else
+            {
+                this.Show();
+            }
         }
 
         private void BtnThanhToan_Click(object sender, EventArgs e)
@@ -547,14 +551,21 @@ namespace TTCSDL_NHOM7.GUIs
             if (MessageBox.Show(message, "Xác nhận thanh toán",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                LuuVeVaoDatabase();
-                MessageBox.Show("Thanh toán thành công!", "Thông báo",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                this.Close();
+                if (LuuVeVaoDatabase())
+                {
+                    // Cập nhật lại danh sách ghế đã đặt
+                    LoadGheDaDat();
+                    // Tải lại danh sách ghế để cập nhật giao diện
+                    LoadDanhSachGhe();
+
+                    MessageBox.Show("Thanh toán thành công!", "Thông báo",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    this.Close();
+                }
             }
         }
 
-        private void LuuVeVaoDatabase()
+        private bool LuuVeVaoDatabase()
         {
             try
             {
@@ -565,12 +576,14 @@ namespace TTCSDL_NHOM7.GUIs
                 {
                     MessageBox.Show("Lỗi khi tạo hóa đơn!", "Lỗi",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
+                    return false;
                 }
 
-                // Lưu từng vé
+                // Lưu từng vé với trạng thái ĐÃ BÁN (TrangThai = 2)
                 foreach (string idGhe in danhSachGheChon)
                 {
+                    decimal tienBanVe = tongTien / danhSachGheChon.Count;
+
                     DataProvider.ExecuteNonQuery(
                         "INSERT INTO Ve (idLichChieu, idGhe, idHoaDon, TrangThai, TienBanVe) " +
                         "VALUES (@idLichChieu, @idGhe, @idHoaDon, 2, @tienBanVe)",
@@ -578,14 +591,26 @@ namespace TTCSDL_NHOM7.GUIs
                         new SqlParameter("@idLichChieu", idLichChieu),
                         new SqlParameter("@idGhe", idGhe),
                         new SqlParameter("@idHoaDon", idHoaDon),
-                        new SqlParameter("@tienBanVe", tongTien / danhSachGheChon.Count)
+                        new SqlParameter("@tienBanVe", tienBanVe)
                     );
                 }
+
+                // Debug: Kiểm tra đã lưu bao nhiêu vé
+                var dtCheck = DataProvider.ExecuteQuery(
+                    "SELECT COUNT(*) as SoVe FROM Ve WHERE idLichChieu = @idLichChieu AND TrangThai = 2",
+                    CommandType.Text,
+                    new SqlParameter("@idLichChieu", idLichChieu)
+                );
+
+                Console.WriteLine($"=== DEBUG: Đã lưu {dtCheck.Rows[0]["SoVe"]} vé ===");
+
+                return true;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi khi lưu vé: {ex.Message}", "Lỗi",
+                MessageBox.Show($"Lỗi khi lưu vé: {ex.Message}\n{ex.StackTrace}", "Lỗi",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
             }
         }
 
@@ -596,20 +621,17 @@ namespace TTCSDL_NHOM7.GUIs
                 string idHoaDon = "HD" + DateTime.Now.ToString("yyyyMMddHHmmss");
                 string idNhanVien = TTCSDL_NHOM7.Utilities.UserSession.MaNV ?? "";
 
-                DataProvider.ExecuteNonQuery(
-                    "INSERT INTO HoaDon (id, idLichChieu, idNhanVien, NgayLap, TongTien, GiamGia, ThanhTien, PhuongThucTT, TrangThai) " +
-                    "VALUES (@id, @idLichChieu, @idNhanVien, GETDATE(), @tongTien, 0, @tongTien, 0, 2)",
-                    CommandType.Text,
-                    new SqlParameter("@id", idHoaDon),
-                    new SqlParameter("@idLichChieu", idLichChieu),
-                    new SqlParameter("@idNhanVien", idNhanVien),
-                    new SqlParameter("@tongTien", tongTien)
-                );
-                return idHoaDon;
+                // Sử dụng DuLieuDAO để tạo hóa đơn
+                int result = DuLieuDAO.Insert_HoaDon(idHoaDon, idNhanVien, tongTien, idLichChieu);
+
+                if (result > 0)
+                    return idHoaDon;
+                else
+                    return string.Empty;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                MessageBox.Show("Lỗi khi tạo hóa đơn!", "Lỗi",
+                MessageBox.Show($"Lỗi khi tạo hóa đơn: {ex.Message}", "Lỗi",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return string.Empty;
             }
@@ -635,13 +657,8 @@ namespace TTCSDL_NHOM7.GUIs
                     return;
                 }
 
-                // Sử dụng stored procedure để tạo ghế tự động
-                DataProvider.ExecuteNonQuery(
-                    "USP_Ghe_CRUD",
-                    CommandType.StoredProcedure,
-                    new SqlParameter("@Action", "GENERATE_BY_PHONG"),
-                    new SqlParameter("@IdPhong", idPhong)
-                );
+                // Sử dụng DuLieuDAO để tạo ghế tự động
+                DuLieuDAO.SinhGheTheoPhong(idPhong);
 
                 MessageBox.Show("Đã tạo ghế tự động thành công!\nVui lòng tải lại form.",
                     "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -654,6 +671,14 @@ namespace TTCSDL_NHOM7.GUIs
                 MessageBox.Show($"Lỗi khi tạo ghế: {ex.Message}", "Lỗi",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        // Thêm sự kiện Form Activated để cập nhật lại dữ liệu khi form được kích hoạt lại
+        private void DATGHE_Activated(object sender, EventArgs e)
+        {
+            Console.WriteLine("=== Form DATGHE được kích hoạt lại ===");
+            LoadGheDaDat();
+            LoadDanhSachGhe();
         }
     }
 }

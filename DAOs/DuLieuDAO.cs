@@ -587,6 +587,21 @@ namespace TTCSDL_NHOM7.DAOs
         }
         #endregion
 
+        //Thao tác với bảng chi tiết món ăn
+        #region ChiTietMonAn
+        public static int Insert_ChiTietMonAn(string idHoaDon, string idMonAn, int soLuong, decimal donGia, decimal thanhTien)
+        {
+            string query = "INSERT INTO ChiTietMonAn (idHoaDon, idMonAn, SoLuong, DonGia, ThanhTien) " +
+                          "VALUES (@idHoaDon, @idMonAn, @soLuong, @donGia, @thanhTien)";
+            return DataProvider.ExecuteNonQuery(query, CommandType.Text,
+                new SqlParameter("@idHoaDon", idHoaDon),
+                new SqlParameter("@idMonAn", idMonAn),
+                new SqlParameter("@soLuong", soLuong),
+                new SqlParameter("@donGia", donGia),
+                new SqlParameter("@thanhTien", thanhTien));
+        }
+        #endregion
+
         // Các hàm tiện ích chuyển đổi hình ảnh
         #region Image Utils
         public static byte[] ImageToByteArray(Image img)
