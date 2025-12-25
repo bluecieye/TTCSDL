@@ -23,7 +23,7 @@ namespace TTCSDL_NHOM7.UserControls.DuLieuUC_Controls
         // ================== ComboBox ==================
         private void LoadComboBox()
         {
-            DataTable dtPhim = DuLieuDAO.GetAll_DinhDang();
+            DataTable dtPhim = DuLieuDAO.loadComboBox_DinhDang();
             DataTable dtManHinh = DuLieuDAO.GetAll_ManHinh();
 
             SetupComboBox(combox_MaPhim, dtPhim, "MaPhim", "MaPhim");

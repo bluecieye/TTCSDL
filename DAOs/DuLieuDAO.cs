@@ -296,7 +296,10 @@ namespace TTCSDL_NHOM7.DAOs
         {
             return Phim_CRUD("GET_INFO", maPhim: maPhim);
         }
-
+        public static DataTable loadComboBox_DinhDang()
+        {
+            return Phim_CRUD("GET_COMBO");
+        }
         #region BanVe
         public static DataTable LayPhimDangChieu(DateTime ngay)
         {
@@ -541,7 +544,7 @@ namespace TTCSDL_NHOM7.DAOs
 
         // Lấy vé theo lịch chiếu
         public static DataTable GetAll_Ve(string maLichChieu)
-            => Ve_CRUD("GET_ALL_THEO_LICHCHIEU", maLichChieu);
+            => Ve_CRUD("GET_ALL_VE_BY_LICHCHIEU", maLichChieu);
 
         // Tự động tạo vé theo lịch chiếu
         public static void AutoAdd_Ve(string maLichChieu)
